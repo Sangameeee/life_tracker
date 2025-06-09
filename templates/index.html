@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div id="home-page">
+        <div class="main-container">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tasks"></i>
+                    Today's Tasks
+                </h2>
+                
+                <div class="points-display">
+                    Today's Points: <span id="daily-points">0</span>
+                </div>
+
+                <button class="add-task-btn" onclick="toggleTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add New Task
+                </button>
+
+                <div class="task-input" id="task-input">
+                    <input type="text" id="new-task-name" placeholder="Task name...">
+                    <input type="number" id="new-task-points" class="points-input" placeholder="pts" min="1" value="10">
+                    
+                    <button onclick="addTask()" class="add-task-btn" style="margin: 0;">Add</button>
+                </div>
+
+                <div id="tasks-container">
+                    <!-- Tasks will be added here dynamically -->
+                </div>
+
+                <div class="undone-tasks" id="undone-tasks-section">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Undone Tasks - Write Excuse</h3>
+                    <div id="undone-tasks-list">
+                        <!-- Undone tasks will appear here -->
+                    </div>
+                </div>
+
+                <div class="daily-reflection">
+                    <h3><i class="fas fa-journal-whills"></i> Daily Reflection</h3>
+                    <textarea id="daily-notes" class="reflection-input" placeholder="How was your day? What did you learn? What can you improve tomorrow?"></textarea>
+                    <div class="photo-section">
+                            <h3>Daily Photo</h3>
+                            <div class="photo-container" id="daily-photo">
+                                <img src="" alt="Daily Photo" id="photo-preview" style="max-width: 100%; display: none;">
+                                <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="previewPhoto(event)">
+                                <label for="photo-input" class="camera-button">
+                                    <i class="fas fa-camera"></i> Capture Photo
+                                </label>
+                            </div>
+                    </div>
+                    <button id="save-changes-btn" class="save-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="submit-day-btn" onclick="submitDay()">
+                       
+                        
+                        <i class="fas fa-check-circle"></i>
+                        Submit Day
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Progress Calendar
+                </h2>
+                <div class="calendar" id="calendar">
+                    <!-- Add to index.html near the calendar -->
+                    <div class="date-navigation">
+                        <button onclick="changeDay(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <span id="current-date-display"></span>
+                        <button onclick="changeDay(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <!-- In your HTML calendar section -->
+                    <div class="calendar-controls">
+                        <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <span id="current-month-display">
+                            <!-- This will be populated with the current month/year -->
+                        </span>
+                        <button onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

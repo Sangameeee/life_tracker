@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Life Gamification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            /* -webkit-background-clip: text; */
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            border: 2px solid #e0e8f7;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.points { color: #ffd700; }
+        .stat-icon.average { color: #667eea; }
+        .stat-icon.streak { color: #ff6b6b; }
+        .stat-icon.total-days { color: #4CAF50; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .history-title {
+            font-size: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .history-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #f8f9fa;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .history-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .history-points {
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+        }
+
+        .history-points.positive {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .history-points.negative {
+            background: linear-gradient(45deg, #ff4757, #e74c3c);
+            color: white;
+        }
+
+        .history-points.zero {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .achievements-section {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .achievements-title {
+            font-size: 1.5rem;
+            color: #856404;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement-badge {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-text {
+            font-size: 0.9rem;
+            color: #856404;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+            }
+            
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-user-circle"></i> Your Profile</h1>
+            <p>Track your progress and celebrate your achievements</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon points">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-number" id="total-points">0</div>
+                <div class="stat-label">Total Points</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon average">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number" id="avg-points">0</div>
+                <div class="stat-label">Daily Average</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon streak">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-number" id="current-streak">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon total-days">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number" id="total-days">0</div>
+                <div class="stat-label">Days Tracked</div>
+            </div>
+        </div>
+
+        <div class="achievements-section">
+            <h2 class="achievements-title">
+                <i class="fas fa-trophy"></i>
+                Achievements
+            </h2>
+            <div class="achievements-grid" id="achievements-grid">
+                <!-- Achievements will be populated here -->
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2 class="chart-title">
+                <i class="fas fa-chart-area"></i>
+                Progress Over Time
+            </h2>
+            <div class="chart-container">
+                <canvas id="progress-chart" class="chart-canvas"></canvas>
+            </div>
+            <div style="text-align: center; color: #666; font-size: 0.9rem;">
+                Last 30 days progress
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h2 class="history-title">
+                    <i class="fas fa-history"></i>
+                    Daily History
+                </h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterHistory('all')">All</button>
+                    <button class="filter-btn" onclick="filterHistory('week')">This Week</button>
+                    <button class="filter-btn" onclick="filterHistory('month')">This Month</button>
+                </div>
+            </div>
+            <div class="history-scroll" id="history-container">
+                <!-- History items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameData = {};
+        let currentFilter = 'all';
+
+        // Load data from localStorage
+        function loadGameData() {
+            const saved = localStorage.getItem('lifeGameData');
+            if (saved) {
+                gameData = JSON.parse(saved);
+            }
+        }
+
+        // Initialize page
+        window.onload = function() {
+            loadGameData();
+            updateStats();
+            renderProgressChart();
+            renderHistory();
+            renderAchievements();
+        };
+
+        function updateStats() {
+            const history = gameData.dailyHistory || [];
+            const totalPoints = history.reduce((sum, day) => sum + (day.points || 0), 0);
+            const avgPoints = history.length > 0 ? Math.round(totalPoints / history.length) : 0;
+            const currentStreak = gameData.streak || 0;
+            const totalDays = history.length;
+
+            document.getElementById('total-points').textContent = totalPoints;
+            document.getElementById('avg-points').textContent = avgPoints;
+            document.getElementById('current-streak').textContent = currentStreak;
+            document.getElementById('total-days').textContent = totalDays;
+        }
+
+        function renderProgressChart() {
+            const canvas = document.getElementById('progress-chart');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const history = gameData.dailyHistory || [];
+            const last30Days = history.slice(-30);
+            
+            if (last30Days.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available yet', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            const maxPoints = Math.max(...last30Days.map(day => day.points || 0), 0);
+            const minPoints = Math.min(...last30Days.map(day => day.points || 0), 0);
+            const range = Math.max(maxPoints - minPoints, 1);
+            
+            const width = canvas.width - 60;
+            const height = canvas.height - 60;
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = 30 + (height / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(30, y);
+                ctx.lineTo(width + 30, y);
+                ctx.stroke();
+            }
+            
+            // Draw y-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const value = maxPoints - (range / 5) * i;
+                const y = 30 + (height / 5) * i;
+                ctx.fillText(Math.round(value), 25, y + 5);
+            }
+            
+            // Draw line chart
+            if (last30Days.length > 1) {
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                
+                last30Days.forEach((day, index) => {
+                    const x = 30 + (width / (last30Days.length - 1)) * index;
+                    const y = 30 + height - ((day.points - minPoints) / range) * height;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                
+                // Draw points
+                ctx.fillStyle = '#667eea';
+                last30Days.forEach((day, index) => {
+                    const x = 30 + (width / (last30Days.length - 1)) * index;
+                    const y = 30 + height - ((day.points - minPoints) / range) * height;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            const history = gameData.dailyHistory || [];
+            
+            let filteredHistory = [...history];
+            
+            // Apply filter
+            const now = new Date();
+            if (currentFilter === 'week') {
+                const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                filteredHistory = history.filter(day => new Date(day.date) >= weekAgo);
+            } else if (currentFilter === 'month') {
+                const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+                filteredHistory = history.filter(day => new Date(day.date) >= monthAgo);
+            }
+            
+            // Sort by date (newest first)
+            filteredHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = '';
+            
+            if (filteredHistory.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No history data available</div>';
+                return;
+            }
+            
+            filteredHistory.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'history-item';
+                
+                const tasks = day.tasks || [];
+                const completedTasks = tasks.filter(t => t.completed).length;
+                const totalTasks = tasks.length;
+                const points = day.points || 0;
+                
+                let pointsClass = 'zero';
+                if (points > 0) pointsClass = 'positive';
+                else if (points < 0) pointsClass = 'negative';
+                
+                dayEl.innerHTML = `
+                    <div>
+                        <div class="history-date">${new Date(day.date).toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}</div>
+                        <div class="history-details">
+                            ${completedTasks}/${totalTasks} tasks completed
+                            ${day.notes ? '• Has reflection notes' : ''}
+                        </div>
+                    </div>
+                    <div class="history-points ${pointsClass}">
+                        ${points > 0 ? '+' : ''}${points} pts
+                    </div>
+                `;
+                
+                container.appendChild(dayEl);
+            });
+        }
+
+        function renderAchievements() {
+            const container = document.getElementById('achievements-grid');
+            const history = gameData.dailyHistory || [];
+            const achievements = [];
+            
+            // Calculate achievements
+            const totalPoints = history.reduce((sum, day) => sum + (day.points || 0), 0);
+            const totalDays = history.length;
+            const bestStreak = gameData.bestStreak || 0;
+            const currentStreak = gameData.streak || 0;
+            
+            // Point-based achievements
+            if (totalPoints >= 100) achievements.push({ icon: '🏆', text: 'First Century', desc: '100+ total points' });
+            if (totalPoints >= 500) achievements.push({ icon: '🎯', text: 'Point Master', desc: '500+ total points' });
+            if (totalPoints >= 1000) achievements.push({ icon: '👑', text: 'Legend', desc: '1000+ total points' });
+            
+            // Streak achievements
+            if (bestStreak >= 3) achievements.push({ icon: '🔥', text: 'On Fire', desc: '3+ day streak' });
+            if (bestStreak >= 7) achievements.push({ icon: '⚡', text: 'Week Warrior', desc: '7+ day streak' });
+            if (bestStreak >= 30) achievements.push({ icon: '💪', text: 'Month Master', desc: '30+ day streak' });
+            
+            // Consistency achievements
+            if (totalDays >= 7) achievements.push({ icon: '📈', text: 'Committed', desc: '7 days tracked' });
+            if (totalDays >= 30) achievements.push({ icon: '🎖️', text: 'Dedicated', desc: '30 days tracked' });
+            if (totalDays >= 100) achievements.push({ icon: '🌟', text: 'Unstoppable', desc: '100 days tracked' });
+            
+            container.innerHTML = '';
+            
+            if (achievements.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #856404;">Complete tasks to unlock achievements!</div>';
+                return;
+            }
+            
+            achievements.forEach(achievement => {
+                const achievementEl = document.createElement('div');
+                achievementEl.className = 'achievement-badge';
+                achievementEl.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-text">
+                        <strong>${achievement.text}</strong><br>
+                        <small>${achievement.desc}</small>
+                    </div>
+                `;
+                container.appendChild(achievementEl);
+            });
+        }
+
+        function filterHistory(filter) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderHistory();
+        }
+
+        // Responsive chart resize
+        window.addEventListener('resize', function() {
+            setTimeout(renderProgressChart, 100);
+        });
+    </script>
+</body>
+</html>

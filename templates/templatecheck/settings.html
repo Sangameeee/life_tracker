@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Life Gamification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  rel="stylesheet">
+    <style>
+        /* Reuse the same styles as index.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .back-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+        .settings-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .settings-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .settings-card {
+            display: grid;
+            gap: 2rem;
+        }
+        .settings-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            border: 2px solid #e9ecef;
+        }
+        .settings-item h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .settings-item p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .settings-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .settings-button:hover {
+            transform: translateY(-2px);
+        }
+        .danger-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        .danger-button:hover {
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+        }
+        .file-input {
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+        <div class="header">
+            <h1><i class="fas fa-cog"></i> Settings</h1>
+            <p>Manage your account and preferences</p>
+        </div>
+        <div class="settings-section">
+            <h2 class="settings-title"><i class="fas fa-download"></i> Export Data</h2>
+            <div class="settings-card">
+                <div class="settings-item">
+                    <h3>Export All Data</h3>
+                    <p>Download your tasks, goals, and progress as a JSON file.</p>
+                    <button class="settings-button" onclick="exportData()">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2 class="settings-title"><i class="fas fa-upload"></i> Import Data</h2>
+            <div class="settings-card">
+                <div class="settings-item">
+                    <h3>Import Data</h3>
+                    <p>Restore your data from a previously exported JSON file.</p>
+                    <input type="file" id="import-file" class="file-input" accept=".json">
+                    <button class="settings-button" onclick="importData()">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h2 class="settings-title"><i class="fas fa-trash"></i> Reset Data</h2>
+            <div class="settings-card">
+                <div class="settings-item">
+                    <h3>Reset All Data</h3>
+                    <p>Permanently delete all your data. This action cannot be undone.</p>
+                    <button class="settings-button danger-button" onclick="resetAllData()">
+                        <i class="fas fa-exclamation-triangle"></i> Reset Everything
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function exportData() {
+            const dataStr = JSON.stringify(localStorage.getItem('lifeGameData'), null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `lifequest-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file to import');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    localStorage.setItem('lifeGameData', importedData);
+                    location.reload(); // Refresh page to show imported data
+                } catch (error) {
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone!')) {
+                const confirmation = prompt('Type "RESET" to confirm:');
+                if (confirmation === 'RESET') {
+                    localStorage.removeItem('lifeGameData');
+                    location.reload();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="profile-page">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Your Profile & Stats
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                    <div class="points-display">
+                        Total Points: <span id="total-points">0</span>
+                    </div>
+                    <div class="points-display">
+                        Average Daily: <span id="avg-points">0</span>
+                    </div>
+                    <div class="points-display">
+                        Best Streak: <span id="best-streak">0</span>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-chart-line"></i> Progress Chart</h3>
+                    <canvas id="progress-chart" width="400" height="200"></canvas>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; max-height: 400px; overflow-y: auto;">
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Daily History</h3>
+                    <div id="daily-history">
+                        <!-- History will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

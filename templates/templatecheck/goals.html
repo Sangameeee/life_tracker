@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Gamification - Goals</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            /* -webkit-background-clip: text; */
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .streak-counter {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tasks-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .goal-card {
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid;
+        }
+
+        .weekly-goal {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: #3498db;
+        }
+
+        .monthly-goal {
+            background: rgba(155, 89, 182, 0.1);
+            border-color: #9b59b6;
+        }
+
+        .yearly-goal {
+            background: rgba(230, 126, 34, 0.1);
+            border-color: #e67e22;
+        }
+
+        .goal-title {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+        }
+
+        .weekly-goal .goal-title {
+            color: #3498db;
+        }
+
+        .monthly-goal .goal-title {
+            color: #9b59b6;
+        }
+
+        .yearly-goal .goal-title {
+            color: #e67e22;
+        }
+
+        .reflection-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .reflection-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-day-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-day-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .weekly-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .monthly-btn {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .yearly-btn {
+            background: linear-gradient(45deg, #e67e22, #d35400);
+        }
+
+        @media (max-width: 768px) {
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-trophy"></i> LifeQuest
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="/permanent-tasks"><i class="fas fa-list"></i> Permanent Tasks</a></li>
+                    <li><a href="/goals" class="active"><i class="fas fa-bullseye"></i> Goals</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+            <div class="streak-counter">
+                <i class="fas fa-fire"></i>
+                <span id="streak-count">0</span> Day Streak
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="tasks-section">
+            <h2 class="section-title">
+                <i class="fas fa-bullseye"></i>
+                Goals & Aspirations
+            </h2>
+            
+            <div class="goals-grid">
+                <div class="goal-card weekly-goal">
+                    <h3 class="goal-title">
+                        <i class="fas fa-calendar-week"></i> 
+                        Weekly Goals
+                    </h3>
+                    <textarea id="weekly-goals" class="reflection-input" placeholder="What do you want to achieve this week?"></textarea>
+                    <button onclick="saveGoals()" class="submit-day-btn weekly-btn">
+                        <i class="fas fa-save"></i>
+                        Save Weekly Goals
+                    </button>
+                </div>
+                
+                <div class="goal-card monthly-goal">
+                    <h3 class="goal-title">
+                        <i class="fas fa-calendar-alt"></i> 
+                        Monthly Goals
+                    </h3>
+                    <textarea id="monthly-goals" class="reflection-input" placeholder="What are your goals for this month?"></textarea>
+                    <button onclick="saveGoals()" class="submit-day-btn monthly-btn">
+                        <i class="fas fa-save"></i>
+                        Save Monthly Goals
+                    </button>
+                </div>
+                
+                <div class="goal-card yearly-goal">
+                    <h3 class="goal-title">
+                        <i class="fas fa-calendar"></i> 
+                        Yearly Goals
+                    </h3>
+                    <textarea id="yearly-goals" class="reflection-input" placeholder="What are your big goals for this year?"></textarea>
+                    <button onclick="saveGoals()" class="submit-day-btn yearly-btn">
+                        <i class="fas fa-save"></i>
+                        Save Yearly Goals
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 2rem; background: rgba(46, 204, 113, 0.1); border-radius: 15px; border: 2px solid #2ecc71;">
+                <h3 style="color: #27ae60; margin-bottom: 1rem;">
+                    <i class="fas fa-lightbulb"></i> 
+                    Goal Setting Tips
+                </h3>
+                <ul style="color: #666; line-height: 1.6;">
+                    <li><strong>Be Specific:</strong> Instead of "get fit", write "exercise 30 minutes daily"</li>
+                    <li><strong>Make it Measurable:</strong> Set clear metrics to track progress</li>
+                    <li><strong>Set Deadlines:</strong> Give yourself realistic timeframes</li>
+                    <li><strong>Break it Down:</strong> Large goals should be broken into smaller tasks</li>
+                    <li><strong>Review Regularly:</strong> Come back to update and refine your goals</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        let gameData = {
+            dailyTasks: [],
+            permanentRedTasks: [],
+            permanentGreenTasks: [],
+            dailyHistory: [],
+            goals: {
+                weekly: '',
+                monthly: '',
+                yearly: ''
+            },
+            streak: 0,
+            bestStreak: 0
+        };
+
+        // Load data from localStorage on page load
+        window.onload = function() {
+            loadGameData(); // Loads data from localStorage
+            renderTasks();
+            renderPermanentTasks();
+            generateCalendar();
+            updateStats();
+            loadGoals();
+        };
+
+        // Local Storage functions
+        function saveGameData() {
+            localStorage.setItem('lifeGameData', JSON.stringify(gameData));
+        }
+
+        function loadGameData() {
+            const saved = localStorage.getItem('lifeGameData');
+            if (saved) {
+                gameData = {...gameData, ...JSON.parse(saved)};
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('streak-count').textContent = gameData.streak;
+        }
+
+        // Goals
+        function loadGoals() {
+            document.getElementById('weekly-goals').value = gameData.goals.weekly || '';
+            document.getElementById('monthly-goals').value = gameData.goals.monthly || '';
+            document.getElementById('yearly-goals').value = gameData.goals.yearly || '';
+        }
+
+        function saveGoals() {
+            gameData.goals.weekly = document.getElementById('weekly-goals').value;
+            gameData.goals.monthly = document.getElementById('monthly-goals').value;
+            gameData.goals.yearly = document.getElementById('yearly-goals').value;
+            saveGameData();
+            
+            // Show success message
+            const originalButton = event.target;
+            const originalText = originalButton.innerHTML;
+            originalButton.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            originalButton.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+            
+            setTimeout(() => {
+                originalButton.innerHTML = originalText;
+                if (originalButton.classList.contains('weekly-btn')) {
+                    originalButton.style.background = 'linear-gradient(45deg, #3498db, #2980b9)';
+                } else if (originalButton.classList.contains('monthly-btn')) {
+                    originalButton.style.background = 'linear-gradient(45deg, #9b59b6, #8e44ad)';
+                } else if (originalButton.classList.contains('yearly-btn')) {
+                    originalButton.style.background = 'linear-gradient(45deg, #e67e22, #d35400)';
+                }
+            }, 1500);
+        }
+
+        // Auto-save functionality
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('reflection-input')) {
+                // Auto-save after 2 seconds of no typing
+                clearTimeout(window.autoSaveTimeout);
+                window.autoSaveTimeout = setTimeout(() => {
+                    gameData.goals.weekly = document.getElementById('weekly-goals').value;
+                    gameData.goals.monthly = document.getElementById('monthly-goals').value;
+                    gameData.goals.yearly = document.getElementById('yearly-goals').value;
+                    saveGameData();
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

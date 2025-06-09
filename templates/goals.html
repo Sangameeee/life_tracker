@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="goals-page">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-bullseye"></i>
+                    Goals & Aspirations
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div style="background: rgba(52, 152, 219, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #3498db;">
+                        <h3 style="color: #3498db; margin-bottom: 1rem;"><i class="fas fa-calendar-week"></i> Weekly Goals</h3>
+                        <textarea id="weekly-goals" class="reflection-input" placeholder="What do you want to achieve this week?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #3498db, #2980b9);">Save</button>
+                    </div>
+                    
+                    <div style="background: rgba(155, 89, 182, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #9b59b6;">
+                        <h3 style="color: #9b59b6; margin-bottom: 1rem;"><i class="fas fa-calendar-alt"></i> Monthly Goals</h3>
+                        <textarea id="monthly-goals" class="reflection-input" placeholder="What are your goals for this month?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #9b59b6, #8e44ad);">Save</button>
+                    </div>
+                    
+                    <div style="background: rgba(230, 126, 34, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #e67e22;">
+                        <h3 style="color: #e67e22; margin-bottom: 1rem;"><i class="fas fa-calendar"></i> Yearly Goals</h3>
+                        <textarea id="yearly-goals" class="reflection-input" placeholder="What are your big goals for this year?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #e67e22, #d35400);">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

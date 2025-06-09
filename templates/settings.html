@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="settings-page">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </h2>
+                
+                <div style="display: grid; gap: 2rem;">
+                    <div style="background: white; padding: 2rem; border-radius: 15px;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-download"></i> Export Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">Download all your data as a JSON file for backup</p>
+                        <button onclick="exportData()" class="add-task-btn">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                    
+                    <div style="background: white; padding: 2rem; border-radius: 15px;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-upload"></i> Import Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">Load previously exported data</p>
+                        <input type="file" id="import-file" accept=".json" style="margin-bottom: 1rem;">
+                        <button onclick="importData()" class="add-task-btn">
+                            <i class="fas fa-upload"></i>
+                            Import Data
+                        </button>
+                    </div>
+                    
+                    <div style="background: rgba(231, 76, 60, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #e74c3c;">
+                        <h3 style="color: #e74c3c; margin-bottom: 1rem;"><i class="fas fa-trash"></i> Reset All Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">This will permanently delete all your progress and cannot be undone</p>
+                        <button onclick="resetAllData()" class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Reset Everything
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>     
+  
+
+{% endblock %}

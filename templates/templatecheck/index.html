@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Gamification - Home</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            /* -webkit-background-clip: text; */
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .streak-counter {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .tasks-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-task-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-input {
+            display: none;
+            margin-bottom: 1rem;
+            gap: 0.5rem;
+        }
+
+        .task-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .task-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .points-input {
+            width: 80px;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .task-item {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            border: 2px solid #e0e8f7;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-checkbox.checked {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-color: #4CAF50;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .task-points {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .delete-task {
+            color: #ff4757;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .delete-task:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .calendar {
+            width: 100%;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-nav {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .calendar-nav:hover {
+            background: #5a67d8;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-day-header {
+            background: #f7f8fc;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            border-radius: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #e8f0ff;
+        }
+
+        .calendar-day.completed {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #667eea;
+            font-weight: bold;
+        }
+
+        .daily-reflection {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e8f0ff;
+        }
+
+        .reflection-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .reflection-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-day-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-day-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .points-display {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .undone-tasks {
+            background: rgba(255, 71, 87, 0.1);
+            border: 2px solid #ff4757;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .excuse-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 2px solid #ff4757;
+            border-radius: 10px;
+            font-family: inherit;
+            resize: vertical;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-trophy"></i> LifeQuest
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#" class="nav-link" data-page="profile"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="#" class="nav-link" data-page="permanent-tasks"><i class="fas fa-list"></i> Permanent Tasks</a></li>
+                    <li><a href="#" class="nav-link" data-page="goals"><i class="fas fa-bullseye"></i> Goals</a></li>
+                    <li><a href="#" class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+            <div class="streak-counter">
+                <i class="fas fa-fire"></i>
+                <span id="streak-count">0</span> Day Streak
+            </div>
+        </div>
+    </header>
+
+    <div id="home-page" class="page">
+        <div class="main-container">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tasks"></i>
+                    Today's Tasks
+                </h2>
+                
+                <div class="points-display">
+                    Today's Points: <span id="daily-points">0</span>
+                </div>
+
+                <button class="add-task-btn" onclick="toggleTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add New Task
+                </button>
+
+                <div class="task-input" id="task-input">
+                    <input type="text" id="new-task-name" placeholder="Task name...">
+                    <input type="number" id="new-task-points" class="points-input" placeholder="pts" min="1" value="10">
+                    <button onclick="addTask()" class="add-task-btn" style="margin: 0;">Add</button>
+                </div>
+
+                <div id="tasks-container">
+                    <!-- Tasks will be added here dynamically -->
+                </div>
+
+                <div class="undone-tasks" id="undone-tasks-section">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Undone Tasks - Write Excuse</h3>
+                    <div id="undone-tasks-list">
+                        <!-- Undone tasks will appear here -->
+                    </div>
+                </div>
+
+                <div class="daily-reflection">
+                    <h3><i class="fas fa-journal-whills"></i> Daily Reflection</h3>
+                    <textarea id="daily-notes" class="reflection-input" placeholder="How was your day? What did you learn? What can you improve tomorrow?"></textarea>
+                    
+                    <button class="submit-day-btn" onclick="submitDay()">
+                        <i class="fas fa-check-circle"></i>
+                        Submit Day
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-section">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Progress Calendar
+                </h2>
+                <div class="calendar" id="calendar">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile-page" class="page" style="display: none;">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Your Profile & Stats
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                    <div class="points-display">
+                        Total Points: <span id="total-points">0</span>
+                    </div>
+                    <div class="points-display">
+                        Average Daily: <span id="avg-points">0</span>
+                    </div>
+                    <div class="points-display">
+                        Best Streak: <span id="best-streak">0</span>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-chart-line"></i> Progress Chart</h3>
+                    <canvas id="progress-chart" width="400" height="200"></canvas>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; max-height: 400px; overflow-y: auto;">
+                    <h3 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Daily History</h3>
+                    <div id="daily-history">
+                        <!-- History will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permanent Tasks Page -->
+    <div id="permanent-tasks-page" class="page" style="display: none;">
+        <div class="main-container" style="grid-template-columns: 1fr 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title" style="color: #e74c3c;">
+                    <i class="fas fa-times-circle"></i>
+                    Red List (Bad Habits)
+                </h2>
+                
+                <button class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b);" onclick="toggleRedTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add Bad Habit
+                </button>
+
+                <div class="task-input" id="red-task-input">
+                    <input type="text" id="new-red-task-name" placeholder="Bad habit name...">
+                    <input type="number" id="new-red-task-points" class="points-input" placeholder="-pts" max="-1" value="-10">
+                    <button onclick="addRedTask()" class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b); margin: 0;">Add</button>
+                </div>
+
+                <div id="red-tasks-container">
+                    <!-- Red tasks will be added here -->
+                </div>
+            </div>
+
+            <div class="tasks-section">
+                <h2 class="section-title" style="color: #27ae60;">
+                    <i class="fas fa-check-circle"></i>
+                    Green List (Good Habits)
+                </h2>
+                
+                <button class="add-task-btn" onclick="toggleGreenTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add Good Habit
+                </button>
+
+                <div class="task-input" id="green-task-input">
+                    <input type="text" id="new-green-task-name" placeholder="Good habit name...">
+                    <input type="number" id="new-green-task-points" class="points-input" placeholder="pts" min="1" value="15">
+                    <button onclick="addGreenTask()" class="add-task-btn" style="margin: 0;">Add</button>
+                </div>
+
+                <div id="green-tasks-container">
+                    <!-- Green tasks will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Page -->
+    <div id="goals-page" class="page" style="display: none;">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-bullseye"></i>
+                    Goals & Aspirations
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div style="background: rgba(52, 152, 219, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #3498db;">
+                        <h3 style="color: #3498db; margin-bottom: 1rem;"><i class="fas fa-calendar-week"></i> Weekly Goals</h3>
+                        <textarea id="weekly-goals" class="reflection-input" placeholder="What do you want to achieve this week?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #3498db, #2980b9);">Save</button>
+                    </div>
+                    
+                    <div style="background: rgba(155, 89, 182, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #9b59b6;">
+                        <h3 style="color: #9b59b6; margin-bottom: 1rem;"><i class="fas fa-calendar-alt"></i> Monthly Goals</h3>
+                        <textarea id="monthly-goals" class="reflection-input" placeholder="What are your goals for this month?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #9b59b6, #8e44ad);">Save</button>
+                    </div>
+                    
+                    <div style="background: rgba(230, 126, 34, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #e67e22;">
+                        <h3 style="color: #e67e22; margin-bottom: 1rem;"><i class="fas fa-calendar"></i> Yearly Goals</h3>
+                        <textarea id="yearly-goals" class="reflection-input" placeholder="What are your big goals for this year?"></textarea>
+                        <button onclick="saveGoals()" class="submit-day-btn" style="background: linear-gradient(45deg, #e67e22, #d35400);">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="page" style="display: none;">
+        <div class="main-container" style="grid-template-columns: 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </h2>
+                
+                <div style="display: grid; gap: 2rem;">
+                    <div style="background: white; padding: 2rem; border-radius: 15px;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-download"></i> Export Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">Download all your data as a JSON file for backup</p>
+                        <button onclick="exportData()" class="add-task-btn">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                    
+                    <div style="background: white; padding: 2rem; border-radius: 15px;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-upload"></i> Import Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">Load previously exported data</p>
+                        <input type="file" id="import-file" accept=".json" style="margin-bottom: 1rem;">
+                        <button onclick="importData()" class="add-task-btn">
+                            <i class="fas fa-upload"></i>
+                            Import Data
+                        </button>
+                    </div>
+                    
+                    <div style="background: rgba(231, 76, 60, 0.1); padding: 2rem; border-radius: 15px; border: 2px solid #e74c3c;">
+                        <h3 style="color: #e74c3c; margin-bottom: 1rem;"><i class="fas fa-trash"></i> Reset All Data</h3>
+                        <p style="color: #666; margin-bottom: 1rem;">This will permanently delete all your progress and cannot be undone</p>
+                        <button onclick="resetAllData()" class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Reset Everything
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        let gameData = {
+            dailyTasks: [],
+            permanentRedTasks: [],
+            permanentGreenTasks: [],
+            dailyHistory: [],
+            goals: {
+                weekly: '',
+                monthly: '',
+                yearly: ''
+            },
+            streak: 0,
+            bestStreak: 0
+        };
+
+        // Load data from localStorage on page load
+        window.onload = function() {
+            loadGameData();
+            renderTasks();
+            renderPermanentTasks();
+            generateCalendar();
+            updateStats();
+            loadGoals();
+        };
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                showPage(page);
+                
+                // Update active nav
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(pageId + '-page').style.display = 'block';
+            
+            if (pageId === 'profile') {
+                updateProfileStats();
+            }
+        }
+
+        // Local Storage functions
+        function saveGameData() {
+            localStorage.setItem('lifeGameData', JSON.stringify(gameData));
+        }
+
+        function loadGameData() {
+            const saved = localStorage.getItem('lifeGameData');
+            if (saved) {
+                gameData = {...gameData, ...JSON.parse(saved)};
+            }
+            
+            // Initialize today's tasks if not exists
+            const today = new Date().toDateString();
+            if (!gameData.dailyHistory.find(day => day.date === today)) {
+                gameData.dailyTasks = [];
+                gameData.dailyHistory.push({
+                    date: today,
+                    tasks: [],
+                    points: 0,
+                    notes: '',
+                    completed: false
+                });
+            } else {
+                const todayData = gameData.dailyHistory.find(day => day.date === today);
+                gameData.dailyTasks = todayData.tasks || [];
+            }
+        }
+
+        // Task management
+        function toggleTaskInput() {
+            const input = document.getElementById('task-input');
+            input.style.display = input.style.display === 'flex' ? 'none' : 'flex';
+            if (input.style.display === 'flex') {
+                document.getElementById('new-task-name').focus();
+            }
+        }
+
+        function addTask() {
+            const name = document.getElementById('new-task-name').value;
+            const points = parseInt(document.getElementById('new-task-points').value) || 10;
+            
+            if (name.trim()) {
+                const task = {
+                    id: Date.now(),
+                    name: name.trim(),
+                    points: points,
+                    completed: false
+                };
+                
+                gameData.dailyTasks.push(task);
+                saveGameData();
+                renderTasks();
+                
+                // Clear inputs
+                document.getElementById('new-task-name').value = '';
+                document.getElementById('new-task-points').value = '10';
+                toggleTaskInput();
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            
+            gameData.dailyTasks.forEach(task => {
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task-item';
+                taskEl.draggable = true;
+                taskEl.dataset.taskId = task.id;
+                
+                taskEl.innerHTML = `
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
+                        ${task.completed ? '<i class="fas fa-check" style="color: white;"></i>' : ''}
+                    </div>
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        <div class="task-points">${task.points > 0 ? '+' : ''}${task.points} points</div>
+                    </div>
+                    <div class="delete-task" onclick="deleteTask(${task.id})">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                
+                container.appendChild(taskEl);
+            });
+            
+            updateDailyPoints();
+            makeDraggable();
+        }
+
+        function toggleTask(taskId) {
+            const task = gameData.dailyTasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                saveGameData();
+                renderTasks();
+            }
+        }
+
+        function deleteTask(taskId) {
+            gameData.dailyTasks = gameData.dailyTasks.filter(t => t.id !== taskId);
+            saveGameData();
+            renderTasks();
+        }
+
+        function updateDailyPoints() {
+            const points = gameData.dailyTasks.reduce((total, task) => {
+                return total + (task.completed ? task.points : 0);
+            }, 0);
+            document.getElementById('daily-points').textContent = points;
+        }
+
+        // Permanent Tasks
+        function toggleRedTaskInput() {
+            const input = document.getElementById('red-task-input');
+            input.style.display = input.style.display === 'flex' ? 'none' : 'flex';
+            if (input.style.display === 'flex') {
+                document.getElementById('new-red-task-name').focus();
+            }
+        }
+
+        function toggleGreenTaskInput() {
+            const input = document.getElementById('green-task-input');
+            input.style.display = input.style.display === 'flex' ? 'none' : 'flex';
+            if (input.style.display === 'flex') {
+                document.getElementById('new-green-task-name').focus();
+            }
+        }
+
+        function addRedTask() {
+            const name = document.getElementById('new-red-task-name').value;
+            const points = parseInt(document.getElementById('new-red-task-points').value) || -10;
+            
+            if (name.trim()) {
+                const task = {
+                    id: Date.now(),
+                    name: name.trim(),
+                    points: Math.abs(points) * -1, // Ensure negative
+                    type: 'red'
+                };
+                
+                gameData.permanentRedTasks.push(task);
+                saveGameData();
+                renderPermanentTasks();
+                
+                document.getElementById('new-red-task-name').value = '';
+                document.getElementById('new-red-task-points').value = '-10';
+                toggleRedTaskInput();
+            }
+        }
+
+        function addGreenTask() {
+            const name = document.getElementById('new-green-task-name').value;
+            const points = parseInt(document.getElementById('new-green-task-points').value) || 15;
+            
+            if (name.trim()) {
+                const task = {
+                    id: Date.now(),
+                    name: name.trim(),
+                    points: Math.abs(points), // Ensure positive
+                    type: 'green'
+                };
+                
+                gameData.permanentGreenTasks.push(task);
+                saveGameData();
+                renderPermanentTasks();
+                
+                document.getElementById('new-green-task-name').value = '';
+                document.getElementById('new-green-task-points').value = '15';
+                toggleGreenTaskInput();
+            }
+        }
+
+        function renderPermanentTasks() {
+            // Render red tasks
+            const redContainer = document.getElementById('red-tasks-container');
+            redContainer.innerHTML = '';
+            
+            gameData.permanentRedTasks.forEach(task => {
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task-item';
+                taskEl.style.background = 'linear-gradient(135deg, #ffe8e8, #ffcccc)';
+                taskEl.style.borderColor = '#e74c3c';
+                
+                taskEl.innerHTML = `
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        <div class="task-points" style="color: #e74c3c;">${task.points} points</div>
+                    </div>
+                    <div class="delete-task" onclick="deletePermanentTask('red', ${task.id})">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                
+                redContainer.appendChild(taskEl);
+            });
+
+            // Render green tasks
+            const greenContainer = document.getElementById('green-tasks-container');
+            greenContainer.innerHTML = '';
+            
+            gameData.permanentGreenTasks.forEach(task => {
+                const taskEl = document.createElement('div');
+                taskEl.className = 'task-item';
+                taskEl.style.background = 'linear-gradient(135deg, #e8f5e8, #ccffcc)';
+                taskEl.style.borderColor = '#27ae60';
+                
+                taskEl.innerHTML = `
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        <div class="task-points" style="color: #27ae60;">+${task.points} points</div>
+                    </div>
+                    <div class="delete-task" onclick="deletePermanentTask('green', ${task.id})">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                
+                greenContainer.appendChild(taskEl);
+            });
+        }
+
+        function deletePermanentTask(type, taskId) {
+            if (type === 'red') {
+                gameData.permanentRedTasks = gameData.permanentRedTasks.filter(t => t.id !== taskId);
+            } else {
+                gameData.permanentGreenTasks = gameData.permanentGreenTasks.filter(t => t.id !== taskId);
+            }
+            saveGameData();
+            renderPermanentTasks();
+        }
+
+        // Day submission
+        function submitDay() {
+            const today = new Date().toDateString();
+            const undoneTasks = gameData.dailyTasks.filter(task => !task.completed);
+            
+            if (undoneTasks.length > 0) {
+                showUndoneTasksSection(undoneTasks);
+                return;
+            }
+            
+            completeDay();
+        }
+
+        function showUndoneTasksSection(undoneTasks) {
+            const section = document.getElementById('undone-tasks-section');
+            const list = document.getElementById('undone-tasks-list');
+            
+            list.innerHTML = '';
+            undoneTasks.forEach(task => {
+                const taskEl = document.createElement('div');
+                taskEl.style.marginBottom = '1rem';
+                taskEl.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">${task.name} (${task.points} points)</div>
+                    <textarea class="excuse-input" placeholder="Why couldn't you complete this task?" data-task-id="${task.id}"></textarea>
+                `;
+                list.appendChild(taskEl);
+            });
+            
+            section.style.display = 'block';
+            
+            // Update submit button
+            document.querySelector('.submit-day-btn').onclick = completeDay;
+            document.querySelector('.submit-day-btn').innerHTML = '<i class="fas fa-check-circle"></i> Complete Day';
+        }
+
+        function completeDay() {
+            const today = new Date().toDateString();
+            const notes = document.getElementById('daily-notes').value;
+            const points = gameData.dailyTasks.reduce((total, task) => total + (task.completed ? task.points : 0), 0);
+            
+            // Collect excuses for undone tasks
+            const excuses = {};
+            document.querySelectorAll('.excuse-input').forEach(input => {
+                const taskId = input.dataset.taskId;
+                excuses[taskId] = input.value;
+            });
+            
+            const todayData = gameData.dailyHistory.find(day => day.date === today);
+            if (todayData) {
+                todayData.tasks = [...gameData.dailyTasks];
+                todayData.points = points;
+                todayData.notes = notes;
+                todayData.excuses = excuses;
+                todayData.completed = true;
+            }
+            
+            // Update streak
+            const completedTasksCount = gameData.dailyTasks.filter(t => t.completed).length;
+            const totalTasksCount = gameData.dailyTasks.length;
+            
+            if (completedTasksCount === totalTasksCount && totalTasksCount > 0) {
+                gameData.streak++;
+                gameData.bestStreak = Math.max(gameData.bestStreak, gameData.streak);
+            } else {
+                gameData.streak = 0;
+            }
+            
+            saveGameData();
+            updateStats();
+            generateCalendar();
+            
+            alert(`Day completed! You earned ${points} points. Current streak: ${gameData.streak} days.`);
+            
+            // Reset for next day
+            gameData.dailyTasks = [];
+            renderTasks();
+            document.getElementById('daily-notes').value = '';
+            document.getElementById('undone-tasks-section').style.display = 'none';
+        }
+
+        // Calendar
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            calendar.innerHTML = `
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                    <h3>${new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+                    <button class="calendar-nav" onclick="changeMonth(1)">›</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                </div>
+            `;
+            
+            const daysGrid = document.createElement('div');
+            daysGrid.className = 'calendar-grid';
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                daysGrid.appendChild(emptyDay);
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = day;
+                
+                const dayDate = new Date(currentYear, currentMonth, day).toDateString();
+                const dayData = gameData.dailyHistory.find(d => d.date === dayDate);
+                
+                if (dayData && dayData.completed) {
+                    const completionRate = dayData.tasks.filter(t => t.completed).length / dayData.tasks.length;
+                    if (completionRate === 1) {
+                        dayEl.classList.add('completed');
+                    } else if (completionRate >= 0.5) {
+                        dayEl.style.background = 'linear-gradient(45deg, #f39c12, #e67e22)';
+                        dayEl.style.color = 'white';
+                    }
+                }
+                
+                if (dayDate === new Date().toDateString()) {
+                    dayEl.classList.add('today');
+                }
+                
+                daysGrid.appendChild(dayEl);
+            }
+            
+            calendar.appendChild(daysGrid);
+        }
+
+        let currentCalendarMonth = new Date().getMonth();
+        let currentCalendarYear = new Date().getFullYear();
+
+        function changeMonth(direction) {
+            currentCalendarMonth += direction;
+            if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0;
+                currentCalendarYear++;
+            } else if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11;
+                currentCalendarYear--;
+            }
+            generateCalendar();
+        }
+
+        // Stats and Profile
+        function updateStats() {
+            document.getElementById('streak-count').textContent = gameData.streak;
+        }
+
+        function updateProfileStats() {
+            const totalPoints = gameData.dailyHistory.reduce((sum, day) => sum + (day.points || 0), 0);
+            const avgPoints = gameData.dailyHistory.length > 0 ? Math.round(totalPoints / gameData.dailyHistory.length) : 0;
+            
+            document.getElementById('total-points').textContent = totalPoints;
+            document.getElementById('avg-points').textContent = avgPoints;
+            document.getElementById('best-streak').textContent = gameData.bestStreak;
+            
+            renderDailyHistory();
+            renderProgressChart();
+        }
+
+        function renderDailyHistory() {
+            const container = document.getElementById('daily-history');
+            container.innerHTML = '';
+            
+            const sortedHistory = [...gameData.dailyHistory].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 30);
+            
+            sortedHistory.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.style.cssText = 'padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;';
+                
+                const completedTasks = day.tasks ? day.tasks.filter(t => t.completed).length : 0;
+                const totalTasks = day.tasks ? day.tasks.length : 0;
+                
+                dayEl.innerHTML = `
+                    <div>
+                        <div style="font-weight: bold;">${new Date(day.date).toLocaleDateString()}</div>
+                        <div style="color: #666; font-size: 0.9rem;">${completedTasks}/${totalTasks} tasks completed</div>
+                    </div>
+                    <div style="font-weight: bold; color: ${day.points >= 0 ? '#27ae60' : '#e74c3c'};">
+                        ${day.points > 0 ? '+' : ''}${day.points || 0} pts
+                    </div>
+                `;
+                
+                container.appendChild(dayEl);
+            });
+        }
+
+        function renderProgressChart() {
+            const canvas = document.getElementById('progress-chart');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const last30Days = [...gameData.dailyHistory].slice(-30);
+            if (last30Days.length === 0) return;
+            
+            const maxPoints = Math.max(...last30Days.map(day => day.points || 0), 0);
+            const minPoints = Math.min(...last30Days.map(day => day.points || 0), 0);
+            const range = maxPoints - minPoints || 1;
+            
+            const width = canvas.width - 40;
+            const height = canvas.height - 40;
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = 20 + (height / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(20, y);
+                ctx.lineTo(width + 20, y);
+                ctx.stroke();
+            }
+            
+            // Draw line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            last30Days.forEach((day, index) => {
+                const x = 20 + (width / (last30Days.length - 1)) * index;
+                const y = 20 + height - ((day.points - minPoints) / range) * height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Draw points
+            ctx.fillStyle = '#667eea';
+            last30Days.forEach((day, index) => {
+                const x = 20 + (width / (last30Days.length - 1)) * index;
+                const y = 20 + height - ((day.points - minPoints) / range) * height;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        // Goals
+        function loadGoals() {
+            document.getElementById('weekly-goals').value = gameData.goals.weekly || '';
+            document.getElementById('monthly-goals').value = gameData.goals.monthly || '';
+            document.getElementById('yearly-goals').value = gameData.goals.yearly || '';
+        }
+
+        function saveGoals() {
+            gameData.goals.weekly = document.getElementById('weekly-goals').value;
+            gameData.goals.monthly = document.getElementById('monthly-goals').value;
+            gameData.goals.yearly = document.getElementById('yearly-goals').value;
+            saveGameData();
+            alert('Goals saved successfully!');
+        }
+
+        // Settings
+        function exportData() {
+            const dataStr = JSON.stringify(gameData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `lifequest-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file to import');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    gameData = {...gameData, ...importedData};
+                    saveGameData();
+                    location.reload(); // Refresh page to show imported data
+                } catch (error) {
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone!')) {
+                if (confirm('This will permanently delete all your progress. Type "RESET" to confirm.')) {
+                    const confirmation = prompt('Type "RESET" to confirm:');
+                    if (confirmation === 'RESET') {
+                        localStorage.removeItem('lifeGameData');
+                        location.reload();
+                    }
+                }
+            }
+        }
+
+        // Drag and drop functionality
+        function makeDraggable() {
+            const tasks = document.querySelectorAll('.task-item');
+            
+            tasks.forEach(task => {
+                task.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.dataset.taskId);
+                    this.classList.add('dragging');
+                });
+                
+                task.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+            });
+            
+            const container = document.getElementById('tasks-container');
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            container.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const draggedId = parseInt(e.dataTransfer.getData('text/plain'));
+                const dropTarget = e.target.closest('.task-item');
+                
+                if (dropTarget && dropTarget.dataset.taskId) {
+                    const dropId = parseInt(dropTarget.dataset.taskId);
+                    reorderTasks(draggedId, dropId);
+                }
+            });
+        }
+
+        function reorderTasks(draggedId, dropId) {
+            const draggedIndex = gameData.dailyTasks.findIndex(t => t.id === draggedId);
+            const dropIndex = gameData.dailyTasks.findIndex(t => t.id === dropId);
+            
+            if (draggedIndex !== -1 && dropIndex !== -1) {
+                const draggedTask = gameData.dailyTasks.splice(draggedIndex, 1)[0];
+                gameData.dailyTasks.splice(dropIndex, 0, draggedTask);
+                saveGameData();
+                renderTasks();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const activeInput = document.querySelector('.task-input[style*="flex"]');
+                if (activeInput) {
+                    if (activeInput.id === 'task-input') addTask();
+                    else if (activeInput.id === 'red-task-input') addRedTask();
+                    else if (activeInput.id === 'green-task-input') addGreenTask();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

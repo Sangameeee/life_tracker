@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+    <!-- Permanent Tasks Page -->
+    <div id="permanent-tasks-page">
+        <div class="main-container" style="grid-template-columns: 1fr 1fr;">
+            <div class="tasks-section">
+                <h2 class="section-title" style="color: #e74c3c;">
+                    <i class="fas fa-times-circle"></i>
+                    Red List (Bad Habits)
+                </h2>
+                
+                <button class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b);" onclick="toggleRedTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add Bad Habit
+                </button>
+
+                <div class="task-input" id="red-task-input">
+                    <input type="text" id="new-red-task-name" placeholder="Bad habit name...">
+                    <input type="number" id="new-red-task-points" class="points-input" placeholder="-pts" max="-1" value="-10">
+                    <button onclick="addRedTask()" class="add-task-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b); margin: 0;">Add</button>
+                </div>
+
+                <div id="red-tasks-container">
+                    <!-- Red tasks will be added here -->
+                </div>
+            </div>
+
+            <div class="tasks-section">
+                <h2 class="section-title" style="color: #27ae60;">
+                    <i class="fas fa-check-circle"></i>
+                    Green List (Good Habits)
+                </h2>
+                
+                <button class="add-task-btn" onclick="toggleGreenTaskInput()">
+                    <i class="fas fa-plus"></i>
+                    Add Good Habit
+                </button>
+
+                <div class="task-input" id="green-task-input">
+                    <input type="text" id="new-green-task-name" placeholder="Good habit name...">
+                    <input type="number" id="new-green-task-points" class="points-input" placeholder="pts" min="1" value="15">
+                    <button onclick="addGreenTask()" class="add-task-btn" style="margin: 0;">Add</button>
+                </div>
+
+                <div id="green-tasks-container">
+                    <!-- Green tasks will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

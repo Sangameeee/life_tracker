@@ -1,0 +1,20 @@
+<header class="header">
+    <div class="nav-container">
+        <div class="logo">
+            <i class="fas fa-trophy"></i> LifeQuest
+        </div>
+        <nav>
+            <ul class="nav-links">
+                    <li><a href="{{ url_for('home') }}" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{{ url_for('profile') }}" class="nav-link" data-page="profile"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="{{ url_for('permanent_tasks') }}" class="nav-link" data-page="permanent-tasks"><i class="fas fa-list"></i> Permanent Tasks</a></li>
+                    <li><a href="{{ url_for('goals') }}" class="nav-link" data-page="goals"><i class="fas fa-bullseye"></i> Goals</a></li>
+                    <li><a href="{{ url_for('settings') }}" class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+        <div class="streak-counter">
+            <i class="fas fa-fire"></i>
+            <span id="streak-count">0</span> Day Streak
+        </div>
+    </div>
+</header>
