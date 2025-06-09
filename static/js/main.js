@@ -107,16 +107,30 @@ async function loadGameData() {
     try {
         const data = await apiRequest('/api/data');
         gameData = {...gameData, ...data};
-        
-        // Remove duplicate dates (keep last entry)
-        const dateMap = new Map();
-        gameData.dailyHistory.forEach(day => dateMap.set(day.date, day));
-        gameData.dailyHistory = Array.from(dateMap.values());
-        
-        // Initialize today's tasks
+
+        // Deduplicate dailyHistory
+        const uniqueDates = new Set();
+        gameData.dailyHistory = gameData.dailyHistory.filter(day => {
+            if (uniqueDates.has(day.date)) return false;
+            uniqueDates.add(day.date);
+            return true;
+        });
+
+        // Initialize today's tasks if missing
         const today = formatDateToLocalYYYYMMDD(new Date());
-        const todayData = gameData.dailyHistory.find(day => day.date === today);
-        gameData.dailyTasks = todayData?.tasks || [];
+        if (!gameData.dailyHistory.find(day => day.date === today)) {
+            gameData.dailyTasks = [];
+            gameData.dailyHistory.push({
+                date: today,
+                tasks: [],
+                points: 0,
+                notes: '',
+                photo: ''
+            });
+        } else {
+            const todayData = gameData.dailyHistory.find(day => day.date === today);
+            gameData.dailyTasks = todayData.tasks || [];
+        }
     } catch (error) {
         console.error('Failed to load data:', error);
     }
@@ -132,59 +146,69 @@ function toggleTaskInput() {
         }
     }
 }
-
 async function addTask() {
     const nameEl = document.getElementById('new-task-name');
     const pointsEl = document.getElementById('new-task-points');
-    const dateEl = document.getElementById('task-assign-date');
-    
     if (!nameEl || !pointsEl) return;
-    
+
     const name = nameEl.value;
     const points = parseInt(pointsEl.value) || 10;
-    const assignDate = dateEl?.value || formatDateToLocalYYYYMMDD(new Date());
-    
+
+    // Always use the selected date from calendar
+    const dateDisplay = document.getElementById('current-date-display');
+    const assignDate = dateDisplay?.dataset.date 
+        ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date)) 
+        : formatDateToLocalYYYYMMDD(new Date());
+
     if (name.trim()) {
         const task = {
             name: name.trim(),
             points: points,
             completed: false
         };
-        
+
         try {
             const newTask = await apiRequest(`/api/tasks/${assignDate}`, 'POST', task);
-            
-            // If assigning to current displayed date, add to UI
-            const displayDate = document.getElementById('current-date-display')?.dataset.date;
-            if (assignDate === displayDate) {
-                gameData.dailyTasks.push(newTask);
-                renderTasks();
+
+            // Always update the displayed date's tasks
+            const dayData = gameData.dailyHistory.find(day => day.date === assignDate);
+            if (dayData) {
+                dayData.tasks.push(newTask);
+            } else {
+                gameData.dailyHistory.push({
+                    date: assignDate,
+                    tasks: [newTask],
+                    points: 0,
+                    notes: '',
+                    photo: ''
+                });
             }
-            
+
+            // Update dailyTasks for the current displayed date
+            gameData.dailyTasks.push(newTask);
+            await saveDayData(new Date(assignDate));
+            renderTasks(); // Immediately update UI
+
             // Clear inputs
             nameEl.value = '';
             pointsEl.value = '10';
-            if (dateEl) dateEl.value = '';
             toggleTaskInput();
-            
         } catch (error) {
             alert('Failed to add task');
         }
     }
+    
 }
 
 function renderTasks() {
     const container = document.getElementById('tasks-container');
     if (!container) return;
-    
     container.innerHTML = '';
-    
     gameData.dailyTasks.forEach(task => {
         const taskEl = document.createElement('div');
         taskEl.className = 'task-item';
         taskEl.draggable = true;
         taskEl.dataset.taskId = task.id;
-        
         taskEl.innerHTML = `
             <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
                 ${task.completed ? '<i class="fas fa-check" style="color: white;"></i>' : ''}
@@ -197,14 +221,21 @@ function renderTasks() {
                 <i class="fas fa-trash"></i>
             </div>
         `;
-        
         container.appendChild(taskEl);
     });
-    
     updateDailyPoints();
     makeDraggable();
+}5
+async function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    try {
+        await apiRequest(`/api/tasks/${taskId}`, 'DELETE');
+        gameData.dailyTasks = gameData.dailyTasks.filter(t => t.id !== taskId);
+        renderTasks();
+    } catch (error) {
+        alert('Failed to delete task');
+    }
 }
-
 async function toggleTask(taskId) {
     const task = gameData.dailyTasks.find(t => t.id === taskId);
     if (task) {
@@ -219,15 +250,7 @@ async function toggleTask(taskId) {
     }
 }
 
-async function deleteTask(taskId) {
-    try {
-        await apiRequest(`/api/tasks/${taskId}`, 'DELETE');
-        gameData.dailyTasks = gameData.dailyTasks.filter(t => t.id !== taskId);
-        renderTasks();
-    } catch (error) {
-        alert('Failed to delete task');
-    }
-}
+
 
 function updateDailyPoints() {
     const pointsEl = document.getElementById('daily-points');
@@ -556,26 +579,28 @@ function saveDayData(date) {
         ? formatDateToLocalYYYYMMDD(new Date(displayDate)) 
         : dateStr;
 
-    // Create or update day data
-    let dayData = {
-        date: targetDate,
-        tasks: [...gameData.dailyTasks],
-        points: gameData.dailyTasks.reduce((sum, task) => sum + (task.completed ? task.points : 0), 0),
-        notes: document.getElementById('daily-notes')?.value || '',
-        photo: document.getElementById('photo-preview')?.src || ''
-    };
-
     // Replace existing or add new
     const existingIndex = gameData.dailyHistory.findIndex(d => d.date === targetDate);
     if (existingIndex !== -1) {
-        gameData.dailyHistory[existingIndex] = dayData;
+        gameData.dailyHistory[existingIndex] = {
+            date: targetDate,
+            tasks: [...gameData.dailyTasks],
+            points: gameData.dailyTasks.reduce((sum, task) => sum + (task.completed ? task.points : 0), 0),
+            notes: document.getElementById('daily-notes')?.value || '',
+            photo: document.getElementById('photo-preview')?.src || ''
+        };
     } else {
-        gameData.dailyHistory.push(dayData);
+        gameData.dailyHistory.push({
+            date: targetDate,
+            tasks: [...gameData.dailyTasks],
+            points: 0,
+            notes: '',
+            photo: ''
+        });
     }
 
     try {
-        // Send full replacement to server
-        apiRequest(`/api/day/${targetDate}`, 'PUT', dayData);
+        apiRequest(`/api/day/${targetDate}`, 'PUT', gameData.dailyHistory.find(d => d.date === targetDate));
         generateCalendar();
         showMessage(`Changes saved for ${targetDate}`, 'success');
         return true;
@@ -747,8 +772,6 @@ function updateStats() {
 async function loadDayData(date) {
     const dateStr = formatDateToLocalYYYYMMDD(date);
     let dayData = gameData.dailyHistory.find(d => d.date === dateStr);
-    
-    // Create empty day if missing
     if (!dayData) {
         dayData = {
             date: dateStr,
@@ -759,20 +782,16 @@ async function loadDayData(date) {
         };
         gameData.dailyHistory.push(dayData);
     }
-    
-    // Update UI
+
     gameData.dailyTasks = [...dayData.tasks];
     renderTasks();
-    
-    // Update points
+    // Update UI elements
     const pointsEl = document.getElementById('daily-points');
     if (pointsEl) pointsEl.textContent = dayData.points || 0;
-    
-    // Update notes
+
     const notesEl = document.getElementById('daily-notes');
     if (notesEl) notesEl.value = dayData.notes || '';
-    
-    // Show photo
+
     displayDayPhoto(date);
     updateStats();
 }
@@ -814,30 +833,62 @@ function updateDateDisplay(date) {
 function previewPhoto(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById('photo-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        
-        // Save photo to gameData with proper date format
-        const dateDisplay = document.getElementById('current-date-display');
-        const dateStr = dateDisplay?.dataset.date 
-            ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date))
-            : formatDateToLocalYYYYMMDD(new Date());
-        
-        // Update gameData
-        let dayData = gameData.dailyHistory.find(day => day.date === dateStr);
-        if (!dayData) {
-            dayData = { date: dateStr, photo: '' };
-            gameData.dailyHistory.push(dayData);
-        }
-        dayData.photo = e.target.result;
-    };
-    reader.readAsDataURL(file);
-}
 
+    const dateDisplay = document.getElementById('current-date-display');
+    const dateStr = dateDisplay?.dataset.date 
+        ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date)) 
+        : formatDateToLocalYYYYMMDD(new Date());
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    fetch(`/api/photo/${dateStr}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const preview = document.getElementById('photo-preview');
+            preview.src = data.photo_url;
+            preview.style.display = 'block';
+
+            // Update gameData
+            let dayData = gameData.dailyHistory.find(day => day.date === dateStr);
+            if (!dayData) {
+                dayData = { date: dateStr, tasks: [], points: 0, notes: '', photo: '' };
+                gameData.dailyHistory.push(dayData);
+            }
+            dayData.photo = data.photo_url;
+        } else {
+            alert('Failed to upload photo');
+        }
+    })
+    .catch(error => {
+        console.error('Photo upload error:', error);
+        alert('Error uploading photo');
+    });
+}
+document.getElementById('delete-photo-btn')?.addEventListener('click', async () => {
+    const dateDisplay = document.getElementById('current-date-display');
+    const dateStr = dateDisplay?.dataset.date 
+        ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date))
+        : formatDateToLocalYYYYMMDD(new Date());
+
+    try {
+        await apiRequest(`/api/photo/${dateStr}`, 'DELETE');
+        // Update UI
+        const preview = document.getElementById('photo-preview');
+        preview.src = '';
+        preview.style.display = 'none';
+        // Update gameData
+        const dayData = gameData.dailyHistory.find(d => d.date === dateStr);
+        if (dayData) dayData.photo = '';
+        showMessage('Photo deleted successfully!', 'success');
+    } catch (error) {
+        showMessage('Failed to delete photo', 'error');
+    }
+});
 
 function renderDailyHistory() {
     const container = document.getElementById('daily-history');
@@ -1077,33 +1128,19 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('save-changes-btn')?.addEventListener('click', async () => {
     const dateDisplay = document.getElementById('current-date-display');
     const dateStr = dateDisplay?.dataset.date 
-        ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date))
+        ? formatDateToLocalYYYYMMDD(new Date(dateDisplay.dataset.date)) 
         : formatDateToLocalYYYYMMDD(new Date());
-    
-    let dayData = gameData.dailyHistory.find(day => day.date === dateStr);
-    
-    if (!dayData) {
-        dayData = {
-            date: dateStr,
-            tasks: [],
-            points: 0,
-            notes: '',
-            photo: ''
-        };
-        gameData.dailyHistory.push(dayData);
-    }
-    
-    // Save current state
-    dayData.tasks = [...gameData.dailyTasks];
-    dayData.points = gameData.dailyTasks.reduce((sum, task) => 
-        sum + (task.completed ? task.points : 0), 0);
-    
-    const notesEl = document.getElementById('daily-notes');
-    if (notesEl) dayData.notes = notesEl.value;
-    
+
+    const dayData = {
+        tasks: [...gameData.dailyTasks],
+        points: gameData.dailyTasks.reduce((sum, t) => sum + (t.completed ? t.points : 0), 0),
+        notes: document.getElementById('daily-notes')?.value || '',
+        photo: document.getElementById('photo-preview')?.src || ''
+    };
+
     try {
         await apiRequest(`/api/day/${dateStr}`, 'PUT', dayData);
-        generateCalendar(); // Refresh calendar colors
+        generateCalendar();
         showMessage('Changes saved successfully!', 'success');
     } catch (error) {
         showMessage('Failed to save changes', 'error');

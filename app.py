@@ -26,35 +26,93 @@ else:
         'bestStreak': 0
     }
 
+@app.route('/api/photo/<date>', methods=['POST'])
 def upload_photo(date):
-    # 1. Check if a photo was uploaded
     if 'photo' not in request.files:
         return jsonify({'success': False, 'error': 'No photo uploaded'}), 400
     file = request.files['photo']
     if file.filename == '':
         return jsonify({'success': False, 'error': 'No selected file'}), 400
 
-    # 2. Validate date format (YYYY-MM-DD)
+    # Validate date format
     try:
         datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
-        return jsonify({'success': False, 'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+        return jsonify({'success': False, 'error': 'Invalid date format'}), 400
 
-    # 3. Delete any existing photo(s) for this date
+    # Delete existing photo for this date
     existing_files = glob.glob(os.path.join(PHOTOS_DIR, f'{date}.*'))
     for f in existing_files:
         os.remove(f)
 
-    # 4. Save the new photo with the date as the filename
+    # Save new photo
     ext = os.path.splitext(file.filename)[1] or '.jpg'
     filename = f'{date}{ext}'
     file.save(os.path.join(PHOTOS_DIR, filename))
 
-    # 5. Return success response with photo URL
-    return jsonify({
-        'success': True,
-        'photo_url': f'/static/photos/{filename}'
-    })
+    # Update game_data with new photo URL
+    photo_url = f'/static/photos/{filename}'
+    day_index = next((i for i, d in enumerate(game_data['dailyHistory']) if d['date'] == date), None)
+    if day_index is not None:
+        game_data['dailyHistory'][day_index]['photo'] = photo_url
+    else:
+        game_data['dailyHistory'].append({
+            'date': date,
+            'tasks': [],
+            'points': 0,
+            'notes': '',
+            'photo': photo_url
+        })
+
+    save_data()
+    return jsonify({'success': True, 'photo_url': photo_url})
+
+@app.route('/api/day/<string:date>', methods=['PUT'])
+def update_day(date):
+    try:
+        datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'success': False, 'error': 'Invalid date format'}), 400
+
+    data = request.json
+    day_index = next((i for i, d in enumerate(game_data['dailyHistory']) if d['date'] == date), None)
+
+    if day_index is not None:
+        game_data['dailyHistory'][day_index] = {
+            'date': date,
+            'tasks': data.get('tasks', []),
+            'points': data.get('points', 0),
+            'notes': data.get('notes', ''),
+            'photo': data.get('photo', '')
+        }
+    else:
+        game_data['dailyHistory'].append({
+            'date': date,
+            'tasks': data.get('tasks', []),
+            'points': data.get('points', 0),
+            'notes': data.get('notes', ''),
+            'photo': data.get('photo', '')
+        })
+
+    save_data()
+    return jsonify(success=True)
+
+@app.route('/api/tasks/<int:tid>', methods=['DELETE'])
+
+@app.route('/api/tasks/<int:tid>', methods=['DELETE'])
+
+@app.route('/api/tasks/<int:tid>', methods=['DELETE'])
+def delete_task(tid):
+    # Remove from dailyTasks list
+    game_data['dailyTasks'] = [t for t in game_data['dailyTasks'] if t['id'] != tid]
+
+    # Remove from all dailyHistory entries
+    for day in game_data['dailyHistory']:
+        day['tasks'] = [t for t in day['tasks'] if t['id'] != tid]
+
+    save_data()
+    return jsonify(success=True)
+
 # Utility to save
 def save_data():
     with open(DATA_FILE, 'w') as f:
@@ -90,12 +148,7 @@ def settings():
 def get_data():
     return jsonify(game_data)
 
-@app.route('/api/data', methods=['POST'])
-def update_data():
-    payload = request.json
-    game_data.update(payload)
-    save_data()
-    return jsonify(success=True)
+
 
 # Task CRUD
 @app.route('/api/tasks', methods=['POST'])
@@ -118,10 +171,6 @@ def edit_task(tid):
     return jsonify(success=True)
 
 @app.route('/api/tasks/<int:tid>', methods=['DELETE'])
-def delete_task(tid):
-    game_data['dailyTasks'] = [t for t in game_data['dailyTasks'] if t['id']!=tid]
-    save_data()
-    return jsonify(success=True)
 
 # Permanent tasks
 @app.route('/api/permanent', methods=['POST'])
@@ -143,40 +192,56 @@ def del_perm(t_type, tid):
     return jsonify(success=True)
 
 
-@app.route('/api/day/<string:date>', methods=['PUT'])
-def update_day(date):
+
+    save_data()
+    return jsonify(success=True)
+# Submit day
+@app.route('/api/photo/<date>', methods=['DELETE'])
+def delete_photo(date):
     try:
-        # Validate date format
         datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
         return jsonify({'success': False, 'error': 'Invalid date format'}), 400
 
-    data = request.json
-    day_index = next((i for i, d in enumerate(game_data['dailyHistory']) if d['date'] == date), None)
+    existing_files = glob.glob(os.path.join(PHOTOS_DIR, f'{date}.*'))
+    for f in existing_files:
+        os.remove(f)
+    
+    # Update gameData to remove photo URL
+    global game_data
+    for day in game_data['dailyHistory']:
+        if day['date'] == date:
+            day['photo'] = ''
+            break
+    save_data()
+    
+    return jsonify({'success': True})
+@app.route('/api/tasks/<string:date>', methods=['POST'])
+def add_task_to_date(date):
+    try:
+        datetime.strptime(date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'success': False, 'error': 'Invalid date format'}), 400
 
+    task = request.json
+    task['id'] = int(datetime.now().timestamp() * 1000)
+    task['completed'] = False
+
+    # Find or create day data
+    day_index = next((i for i, d in enumerate(game_data['dailyHistory']) if d['date'] == date), None)
     if day_index is not None:
-        # Replace existing day data
-        game_data['dailyHistory'][day_index] = {
-            'date': date,
-            'tasks': data.get('tasks', []),
-            'points': data.get('points', 0),
-            'notes': data.get('notes', ''),
-            'photo': data.get('photo', '')
-        }
+        game_data['dailyHistory'][day_index]['tasks'].append(task)
     else:
-        # Append new day data
         game_data['dailyHistory'].append({
             'date': date,
-            'tasks': data.get('tasks', []),
-            'points': data.get('points', 0),
-            'notes': data.get('notes', ''),
-            'photo': data.get('photo', '')
+            'tasks': [task],
+            'points': 0,
+            'notes': '',
+            'photo': ''
         })
-    
-    save_data()
-    return jsonify(success=True)
-# Submit day
 
+    save_data()
+    return jsonify(task)
     
 @app.route('/api/submit-day', methods=['POST'])
 def submit_day():
